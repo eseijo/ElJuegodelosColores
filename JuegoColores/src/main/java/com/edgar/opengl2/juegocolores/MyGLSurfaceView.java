@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 
+import javax.microedition.khronos.opengles.GL10;
+
 /**
  * Created by edgar on 12/17/13.
  */
@@ -72,9 +74,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 requestRender();
                 break;
             case MotionEvent.ACTION_DOWN:
-                Log.v("awq2", "" + isShape(x, y));
-                mRenderer.newLevel();
-                requestRender();
+                if(isShape(x,y)){
+                    onPause();
+                    mRenderer.newLevel();
+                    onResume();
+                }
+                break;
         }
 
         mPreviousX = x;
