@@ -53,7 +53,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         convCoords();
 
         switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
+            /*case MotionEvent.ACTION_MOVE:
 
                 float dx = x - mPreviousX;
                 float dy = y - mPreviousY;
@@ -72,11 +72,10 @@ public class MyGLSurfaceView extends GLSurfaceView {
                         mRenderer.getAngle() +
                                 ((dx + dy) * TOUCH_SCALE_FACTOR));  // = 180.0f / 320
                 requestRender();
-                break;
+                break;*/
             case MotionEvent.ACTION_DOWN:
                 if(isShape(x,y)){
                     onPause();
-                    mRenderer.newLevel();
                     onResume();
                 }
                 break;

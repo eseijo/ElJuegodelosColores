@@ -15,7 +15,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
 
         private static final String TAG = "MyGLRenderer";
         //private Triangle mTriangle;
-        private Square   mSquare;
+        private Square mSquare;
         private Circle1 mCircle;
 
         // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -33,7 +33,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
             //mTriangle = new Triangle();
-            //mSquare   = new Square();
+            mSquare   = new Square();
             mCircle = new Circle1();
         }
 
@@ -146,7 +146,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
          * Sets the rotation angle of the triangle shape (mTriangle).
          */
         public void setAngle(float angle) {
-            mAngle = angle; GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f); Log.v("awq2", "setangle");
+            mAngle = angle; GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         }
 
         public float getTopPoint() {
@@ -163,9 +163,5 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
 
         public float getLeftPoint() {
             return mCircle.getLeftPoint();
-        }
-
-        public void newLevel(){
-            mCircle = new Circle1();
         }
 }

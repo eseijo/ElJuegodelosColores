@@ -39,8 +39,8 @@ public class Circle1 {
 
     public Circle1(){
 
-        rad = rad>0.30f ? rad-0.70f : rad;
-        rad = rad<0.05f ? rad+0.05f : rad;
+        while(rad<0.05 || rad>0.3)
+            rad = (float) Math.random();
 
         vertices[0] = 0;
         vertices[1] = 0;
@@ -52,7 +52,7 @@ public class Circle1 {
             vertices[(i * 3)+ 2] = 0;
         }
 
-        float modV[] = randPos(vertices);
+        float modV[] = Utils.randPos(vertices);
         topPoint = modV[271];
         leftPoint = modV[540];
         rightPoint = modV[1080];
@@ -69,7 +69,7 @@ public class Circle1 {
             leftPoint = aux;
         }
 
-        Log.v("awq2", ""+topPoint+" "+botPoint+" "+leftPoint+" "+rightPoint);
+        //Log.v("awq2", ""+topPoint+" "+botPoint+" "+leftPoint+" "+rightPoint);
 
         ByteBuffer vertexByteBuffer = ByteBuffer.allocateDirect(modV.length * 4);
         vertexByteBuffer.order(ByteOrder.nativeOrder());
@@ -131,32 +131,6 @@ public class Circle1 {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
 
-    }
-
-    private float[] randPos(float [] verts){
-        float v[] = new float[364 * 3];
-        float where = (float) Math.random();
-        float rdm = (float)Math.random();
-        float rdm1, rdm2;
-        if(where<0.25f){
-            rdm1 = rdm;
-            rdm2 = rdm;
-        } else if (0.25f<=where && where<0.5f){
-            rdm1 = -rdm;
-            rdm2 = rdm;
-        } else if(0.5f<where && where<0.75f){
-            rdm1 = rdm;
-            rdm2 = -rdm;
-        } else {
-            rdm1 = -rdm;
-            rdm2 = -rdm;
-        }
-
-        for(int i =0; i <364; i++){
-            v[(i * 3)+ 0] = verts[(i * 3)+ 0] + rdm1;
-            v[(i * 3)+ 1] = verts[(i * 3)+ 1] + rdm2;
-        }
-        return v;
     }
 
 
