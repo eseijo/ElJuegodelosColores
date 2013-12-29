@@ -28,18 +28,29 @@ import java.nio.FloatBuffer;
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class Triangle {
+public class Triangle implements Shape{
 
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
+            //"uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
                     "void main() {" +
                     // the matrix must be included as a modifier of gl_Position
                     // Note that the uMVPMatrix factor *must be first* in order
                     // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "  gl_Position = vPosition;" +//uMVPMatrix *
+                    "}";
+
+    private final String altVertexShaderCode =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = vPosition;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -54,35 +65,66 @@ public class Triangle {
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+    float l = (float)Math.random();
+    private float topPoint;
+    private float botPoint;
+    private float leftPoint;
+    private float rightPoint;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = {
-            // in counterclockwise order:
-            0.0f,  0.622008459f, 0.0f,   // top
-            -0.5f, -0.311004243f, 0.0f,   // bottom left
-            0.5f, -0.311004243f, 0.0f    // bottom right
-    };
+    float triangleCoords[] = new float[3 *3];
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    float color[] = { 0.0f, 0.0f, 1.0f, 0.0f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public Triangle() {
+
+        l = Utils.randSize(l);
+
+        for(int i =0; i <3; i++)
+            triangleCoords[(i * 3) + 2] = 0.5f;
+
+        triangleCoords[0] = ((l/2.75f)-l)/2;
+        triangleCoords[1] = l;
+        triangleCoords[3] = -l;
+        triangleCoords[4] = -l;
+        triangleCoords[6] = l/2.75f;
+        triangleCoords[7] = -l;
+
+        float tGCoords[] = Utils.randPos(triangleCoords);
+
+        topPoint = tGCoords[1];
+        botPoint = tGCoords[4];
+        leftPoint = tGCoords[3];
+        rightPoint = tGCoords[6];
+
+        if(topPoint<botPoint){
+            float aux = topPoint;
+            topPoint = botPoint;
+            botPoint = aux;
+        }
+        if(rightPoint<leftPoint){
+            float aux = rightPoint;
+            rightPoint = leftPoint;
+            leftPoint = aux;
+        }
+
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
-                triangleCoords.length * 4);
+                tGCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
         // add the coordinates to the FloatBuffer
-        vertexBuffer.put(triangleCoords);
+        vertexBuffer.put(tGCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
@@ -99,12 +141,55 @@ public class Triangle {
 
     }
 
+    public Triangle(int p) {
+
+        float tGCoords[] = triangleCoords;
+
+        for(int i =0; i <3; i++)
+            tGCoords[(i * 3) + 2] = 0.5f;
+
+        tGCoords[0] = -0.94f;
+        tGCoords[1] = 0.99f;
+        tGCoords[3] = -0.99f;
+        tGCoords[4] = 0.85f;
+        tGCoords[6] = -0.89f;
+        tGCoords[7] = 0.85f;
+
+        // initialize vertex byte buffer for shape coordinates
+        ByteBuffer bb = ByteBuffer.allocateDirect(
+                // (number of coordinate values * 4 bytes per float)
+                tGCoords.length * 4);
+        // use the device hardware's native byte order
+        bb.order(ByteOrder.nativeOrder());
+
+        // create a floating point buffer from the ByteBuffer
+        vertexBuffer = bb.asFloatBuffer();
+        // add the coordinates to the FloatBuffer
+        vertexBuffer.put(tGCoords);
+        // set the buffer to read the first coordinate
+        vertexBuffer.position(0);
+
+        // prepare shaders and OpenGL program
+        int vertexShader = MyGLRenderer.loadShader(
+                GLES20.GL_VERTEX_SHADER, altVertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(
+                GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+
+    }
+
+
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      *
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
      */
+    @Override
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -142,4 +227,23 @@ public class Triangle {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
+    @Override
+    public float getRightPoint() {
+        return rightPoint;
+    }
+
+    @Override
+    public float getTopPoint() {
+        return topPoint;
+    }
+
+    @Override
+    public float getBotPoint() {
+        return botPoint;
+    }
+
+    @Override
+    public float getLeftPoint() {
+        return leftPoint;
+    }
 }

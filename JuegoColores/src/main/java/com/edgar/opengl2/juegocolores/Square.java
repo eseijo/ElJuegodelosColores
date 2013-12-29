@@ -30,18 +30,29 @@ import java.nio.ShortBuffer;
 /**
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
-public class Square {
+public class Square implements Shape{
 
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
+            //"uniform mat4 uMVPMatrix;" +
                     "attribute vec4 a_Position;" +
                     "void main() {" +
                     // The matrix must be included as a modifier of gl_Position.
                     // Note that the uMVPMatrix factor *must be first* in order
                     // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * a_Position;" +
+                    "  gl_Position = a_Position;" +
+                    "}";
+
+    private final String altVertexShaderCode =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "attribute vec4 a_Position;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // Note that the uMVPMatrix factor *must be first* in order
+                    // for the matrix multiplication product to be correct.
+                    "  gl_Position = a_Position;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -78,8 +89,7 @@ public class Square {
      */
     public Square(){
 
-        while(l<0.05 || l>0.3)
-            l = (float) Math.random();
+        l = Utils.randSize(l);
 
         for(int i =0; i <4; i++)
             squareCoords[(i * 3) + 2] = 0.5f;
@@ -88,21 +98,30 @@ public class Square {
         squareCoords[1] = l;
         squareCoords[3] = -l;
         squareCoords[4] = -l;
-        squareCoords[6] = l;
+        squareCoords[6] = l/3.0f;
         squareCoords[7] = -l;
-        squareCoords[9] = l;
+        squareCoords[9] = l/3.0f;
         squareCoords[10] = l;
-
-        Log.v("awq2", "" + squareCoords[0] + " " + squareCoords[1] + " " + squareCoords[2]);
 
         float sQCoords[] = Utils.randPos(squareCoords);
 
         topPoint = sQCoords[1];
         botPoint = sQCoords[4];
         leftPoint = sQCoords[0];
-        rightPoint = sQCoords[7];
+        rightPoint = sQCoords[6];
 
-        Log.v("awq2", "" + sQCoords[0] + " " + sQCoords[1] + " " + sQCoords[2]);
+        if(topPoint<botPoint){
+            float aux = topPoint;
+            topPoint = botPoint;
+            botPoint = aux;
+        }
+        if(rightPoint<leftPoint){
+            float aux = rightPoint;
+            rightPoint = leftPoint;
+            leftPoint = aux;
+        }
+
+        //Log.v("awq2", "" + sQCoords[0] + " " + sQCoords[1] + " " + sQCoords[2]);
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -136,12 +155,64 @@ public class Square {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
+    public Square(int p){
+
+        float sQCoords[] = squareCoords;
+
+        for(int i =0; i <4; i++)
+            sQCoords[(i * 3) + 2] = 0.5f;
+
+        sQCoords[0] = -0.99f;
+        sQCoords[1] = 0.99f;
+        sQCoords[3] = -0.99f;
+        sQCoords[4] = 0.85f;
+        sQCoords[6] = -0.9f;
+        sQCoords[7] = 0.85f;
+        sQCoords[9] = -0.9f;
+        sQCoords[10] = 0.99f;
+
+        //Log.v("awq2", "" + sQCoords[0] + " " + sQCoords[1] + " " + sQCoords[2]);
+
+        // initialize vertex byte buffer for shape coordinatesº
+        ByteBuffer bb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 4 bytes per float)
+                sQCoords.length * 4);
+        bb.order(ByteOrder.nativeOrder());
+        vertexBuffer = bb.asFloatBuffer();
+        vertexBuffer.put(sQCoords);
+        vertexBuffer.position(0);
+
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 2 bytes per short)
+                drawOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
+        drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put(drawOrder);
+        drawListBuffer.position(0);
+
+        // prepare shaders and OpenGL program
+        int vertexShader = MyGLRenderer.loadShader(
+                GLES20.GL_VERTEX_SHADER,
+                altVertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(
+                GLES20.GL_FRAGMENT_SHADER,
+                fragmentShaderCode);
+
+        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+    }
+
+
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
      *
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
      */
+    @Override
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -181,18 +252,19 @@ public class Square {
         GLES20.glDisableVertexAttribArray(mColorHandle);
     }
 
+    @Override
     public float getTopPoint() {
         return topPoint;
     }
-
+    @Override
     public float getBotPoint() {
         return botPoint;
     }
-
+    @Override
     public float getLeftPoint() {
         return leftPoint;
     }
-
+    @Override
     public float getRightPoint() {
         return rightPoint;
     }

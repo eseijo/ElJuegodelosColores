@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -21,6 +25,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
     private float botPoint;
     private float leftPoint;
     private float rightPoint;
+    OnScoreListener onScoreListener;
+    ArrayList<Shape> shapes;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -34,7 +40,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         // Render the view only when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
     }
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
@@ -49,8 +54,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         float x = e.getX();
         float y = e.getY();
-
-        convCoords();
 
         switch (e.getAction()) {
             /*case MotionEvent.ACTION_MOVE:
@@ -74,7 +77,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 requestRender();
                 break;*/
             case MotionEvent.ACTION_DOWN:
-                if(isShape(x,y)){
+                Log.v("awq1", ""+y+","+x);
+                shapes = mRenderer.getRefShapes();
+                shapes=isShape(x,y,shapes);
+                if(shapes.isEmpty()){
+                    mRenderer.resetShapes();
+                    onScoreListener.onScore();
                     onPause();
                     onResume();
                 }
@@ -86,17 +94,28 @@ public class MyGLSurfaceView extends GLSurfaceView {
         return true;
     }
 
-    private void convCoords(){
-        topPoint = getHeight()-(((mRenderer.getTopPoint()+1)*getHeight())/2);
-        botPoint = getHeight()-(((mRenderer.getBotPoint()+1)*getHeight())/2);
-        leftPoint = ((mRenderer.getLeftPoint()+1)*getWidth())/2;
-        rightPoint = ((mRenderer.getRightPoint()+1)*getWidth())/2;
+    private ArrayList<Shape> isShape(float x, float y, ArrayList<Shape> arrayList){
+        for(Shape mSh : arrayList){
+            topPoint = getHeight()-(((mRenderer.getTopPoint(mSh)+1)*getHeight())/2);
+            botPoint = getHeight()-(((mRenderer.getBotPoint(mSh)+1)*getHeight())/2);
+            leftPoint = ((mRenderer.getLeftPoint(mSh)+1)*getWidth())/2;
+            rightPoint = ((mRenderer.getRightPoint(mSh)+1)*getWidth())/2;
+            Log.v("awq1", ""+topPoint+","+botPoint+","+leftPoint+","+rightPoint);
+
+            if(x<rightPoint && x>leftPoint && y>topPoint && y<botPoint){
+                arrayList.remove(arrayList.indexOf(mSh));
+                return arrayList;
+            }
+        }
+        return arrayList;
     }
 
-    private boolean isShape(float x, float y){
-        if(x<rightPoint && x>leftPoint && y>topPoint && y<botPoint)
-            return true;
-        return false;
+    public interface OnScoreListener {
+        public abstract void onScore();
+    }
+
+    public void setOnScoreListener(OnScoreListener listener) {
+        onScoreListener = listener;
     }
 
 }

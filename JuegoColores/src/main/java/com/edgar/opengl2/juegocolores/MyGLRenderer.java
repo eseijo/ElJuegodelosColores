@@ -5,6 +5,8 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -14,9 +16,23 @@ import javax.microedition.khronos.opengles.GL10;
 public class MyGLRenderer implements GLSurfaceView.Renderer{
 
         private static final String TAG = "MyGLRenderer";
-        //private Triangle mTriangle;
+
+        double refShape;
+
+        ArrayList<Shape> refShapes = new ArrayList<Shape>();
+        ArrayList<Shape> shapes = new ArrayList<Shape>();
+
+        int store = -1;
+
+        private Triangle mTriangle;
         private Square mSquare;
-        private Circle1 mCircle;
+        private Circle mCircle;
+        private Triangle mTriangle0;
+        private Square mSquare0;
+        private Circle mCircle0;
+        private Triangle mTriangle1;
+        private Square mSquare1;
+        private Circle mCircle1;
 
         // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
         private final float[] mMVPMatrix = new float[16];
@@ -31,10 +47,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
 
             // Set the background frame color
             GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            refShape = Math.random();
+            Log.d("log123", ""+refShape);
+            if(refShape<(1.0/3.0)){
+                mTriangle = new Triangle(1);
+                store = 0;
+            }else if(refShape>=(1.0/3.0) && refShape<(2.0/3.0)){
+                mSquare   = new Square(1);
+                store = 1;
+            }else{
+                mCircle = new Circle(1);
+                store = 2;
+            }
+            mCircle0 = new Circle();
+            mCircle1 = new Circle();
+            mTriangle0 = new Triangle();
+            mTriangle1 = new Triangle();
+            mSquare0 = new Square();
+            mSquare1 = new Square();
 
-            //mTriangle = new Triangle();
-            mSquare   = new Square();
-            mCircle = new Circle1();
+            shapes.add(mCircle0);
+            shapes.add(mCircle1);
+            shapes.add(mTriangle0);
+            shapes.add(mTriangle1);
+            shapes.add(mSquare0);
+            shapes.add(mSquare1);
+
+            if(store==2){
+                refShapes.add(mCircle0);
+                refShapes.add(mCircle1);
+            }else if(store==0){
+                refShapes.add(mTriangle0);
+                refShapes.add(mTriangle1);
+            }else{
+                refShapes.add(mSquare0);
+                refShapes.add(mSquare1);
+            }
         }
 
         @Override
@@ -68,11 +116,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             // for the matrix multiplication product to be correct.
             Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
-            if(mSquare!=null)
+
+            if(refShape<(1.0/3.0)){
+                mTriangle.draw(scratch);
+            }else if(refShape>=(1.0/3.0) && refShape<(2.0/3.0)){
                 mSquare.draw(scratch);
+            }else{
+                mCircle.draw(scratch);
+            }
+
+            for(Shape mSh : shapes){
+                mSh.draw(scratch);
+            }
+
+            //if(mSquare!=null)
+              //  mSquare.draw(scratch);
             // Draw triangle
             //mTriangle.draw(scratch);
-            mCircle.draw(scratch);
+            //mCircle.draw(scratch);
+            //mCircle1.draw(scratch);
 
         }
 
@@ -149,19 +211,27 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             mAngle = angle; GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         }
 
-        public float getTopPoint() {
-            return mCircle.getTopPoint();
+        public float getTopPoint(Shape mShape) {
+            return mShape.getTopPoint();
         }
 
-        public float getBotPoint() {
-            return mCircle.getBotPoint();
+        public float getBotPoint(Shape mShape) {
+            return mShape.getBotPoint();
         }
 
-        public float getRightPoint() {
-            return mCircle.getRightPoint();
+        public float getRightPoint(Shape mShape) {
+            return mShape.getRightPoint();
         }
 
-        public float getLeftPoint() {
-            return mCircle.getLeftPoint();
+        public float getLeftPoint(Shape mShape) {
+            return mShape.getLeftPoint();
         }
+
+        public ArrayList<Shape> getRefShapes() {
+            return refShapes;
+        }
+
+        public void resetShapes() {
+            shapes.clear();
+    }
 }

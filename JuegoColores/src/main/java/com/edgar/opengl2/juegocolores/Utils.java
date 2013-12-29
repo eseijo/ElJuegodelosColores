@@ -32,4 +32,11 @@ public class Utils {
         return v;
     }
 
+    public static float randSize(float size){
+        float val = size;
+        while(val<0.05 || val>0.3)
+            val = (float) Math.random();
+        return val;
+    }
+
 }
