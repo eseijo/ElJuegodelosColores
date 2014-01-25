@@ -20,7 +20,6 @@ package com.edgar.opengl2.juegocolores;
  */
 
 import android.opengl.GLES20;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -30,7 +29,7 @@ import java.nio.ShortBuffer;
 /**
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
-public class Square implements Shape{
+public class Rectangle implements Shape{
 
     private final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
@@ -76,26 +75,26 @@ public class Square implements Shape{
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    float squareCoords[] = new float[4 * 3];
+    float rectCoords[] = new float[4 * 3];
 
     private final short drawOrder[] = {0, 1, 2, 3}; // order to draw vertices
 
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    float color[] = { 0.0f, 1.0f, 0.0f, 0.7f};
+    float color[] = { 1.0f, 1.0f, 0.0f, 0.7f};
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Square(){
+    public Rectangle(){
 
-        squareCoords = genCoords();
-        float sQCoords[] = Utils.randPos(squareCoords);
+        rectCoords = genCoords();
+        float rTCoords[] = Utils.randPos(rectCoords);
 
-        topPoint = sQCoords[1];
-        botPoint = sQCoords[4];
-        leftPoint = sQCoords[0];
-        rightPoint = sQCoords[6];
+        topPoint = rTCoords[1];
+        botPoint = rTCoords[4];
+        leftPoint = rTCoords[0];
+        rightPoint = rTCoords[6];
 
         if(topPoint<botPoint){
             float aux = topPoint;
@@ -109,13 +108,13 @@ public class Square implements Shape{
         }
 
         while((topPoint>0.85 || botPoint>0.85)&&(leftPoint<-0.85 || rightPoint<-0.85)){
-            squareCoords = genCoords();
-            sQCoords = Utils.randPos(squareCoords);
+            rectCoords = genCoords();
+            rTCoords = Utils.randPos(rectCoords);
 
-            topPoint = sQCoords[1];
-            botPoint = sQCoords[4];
-            leftPoint = sQCoords[0];
-            rightPoint = sQCoords[6];
+            topPoint = rTCoords[1];
+            botPoint = rTCoords[4];
+            leftPoint = rTCoords[0];
+            rightPoint = rTCoords[6];
 
             if(topPoint<botPoint){
                 float aux = topPoint;
@@ -129,16 +128,15 @@ public class Square implements Shape{
             }
         }
 
-
-        //Log.v("awq2", "" + sQCoords[0] + " " + sQCoords[1] + " " + sQCoords[2]);
+        //Log.v("awq2", "" + rTCoords[0] + " " + rTCoords[1] + " " + rTCoords[2]);
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
-                sQCoords.length * 4);
+                rTCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(sQCoords);
+        vertexBuffer.put(rTCoords);
         vertexBuffer.position(0);
 
         // initialize byte buffer for the draw list
@@ -164,31 +162,31 @@ public class Square implements Shape{
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
-    public Square(int p){
+    public Rectangle(int p){
 
-        float sQCoords[] = squareCoords;
+        float rTCoords[] = rectCoords;
 
         for(int i =0; i <4; i++)
-            sQCoords[(i * 3) + 2] = 0.5f;
+            rTCoords[(i * 3) + 2] = 0.5f;
 
-        sQCoords[0] = -0.99f;
-        sQCoords[1] = 0.99f;
-        sQCoords[3] = -0.99f;
-        sQCoords[4] = 0.85f;
-        sQCoords[6] = -0.9f;
-        sQCoords[7] = 0.85f;
-        sQCoords[9] = -0.9f;
-        sQCoords[10] = 0.99f;
+        rTCoords[0] = -0.99f;
+        rTCoords[1] = 0.99f;
+        rTCoords[3] = -0.99f;
+        rTCoords[4] = 0.85f;
+        rTCoords[6] = -0.85f;
+        rTCoords[7] = 0.85f;
+        rTCoords[9] = -0.85f;
+        rTCoords[10] = 0.99f;
 
-        //Log.v("awq2", "" + sQCoords[0] + " " + sQCoords[1] + " " + sQCoords[2]);
+        //Log.v("awq2", "" + rTCoords[0] + " " + rTCoords[1] + " " + rTCoords[2]);
 
         // initialize vertex byte buffer for shape coordinatesº
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
-                sQCoords.length * 4);
+                rTCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(sQCoords);
+        vertexBuffer.put(rTCoords);
         vertexBuffer.position(0);
 
         // initialize byte buffer for the draw list
@@ -289,12 +287,11 @@ public class Square implements Shape{
         coords[1] = l;
         coords[3] = -l;
         coords[4] = -l;
-        coords[6] = l/3.0f;
+        coords[6] = l*3/3.0f;
         coords[7] = -l;
-        coords[9] = l/3.0f;
+        coords[9] = l*3/3.0f;
         coords[10] = l;
 
         return coords;
     }
-
 }

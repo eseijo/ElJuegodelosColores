@@ -25,8 +25,9 @@ public class MyGLSurfaceView extends GLSurfaceView {
     private float botPoint;
     private float leftPoint;
     private float rightPoint;
-    OnScoreListener onScoreListener;
+    OnShowListener onShowListener;
     ArrayList<Shape> shapes;
+    int missed = -1;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -81,10 +82,17 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 shapes = mRenderer.getRefShapes();
                 shapes=isShape(x,y,shapes);
                 if(shapes.isEmpty()){
+                    missed = -1;
                     mRenderer.resetShapes();
-                    onScoreListener.onScore();
+                    onShowListener.onScore();
                     onPause();
                     onResume();
+                } else {
+                    missed++;
+                }
+                if(missed>0){
+                    missed = -1;
+                    onShowListener.onMiss();
                 }
                 break;
         }
@@ -110,12 +118,13 @@ public class MyGLSurfaceView extends GLSurfaceView {
         return arrayList;
     }
 
-    public interface OnScoreListener {
+    public interface OnShowListener {
         public abstract void onScore();
+        public abstract void onMiss();
     }
 
-    public void setOnScoreListener(OnScoreListener listener) {
-        onScoreListener = listener;
+    public void setOnShowListener(OnShowListener listener) {
+        onShowListener = listener;
     }
 
 }

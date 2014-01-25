@@ -77,24 +77,14 @@ public class Triangle implements Shape{
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    float color[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+    float color[] = { 0.0f, 0.0f, 1.0f, 0.7f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public Triangle() {
 
-        l = Utils.randSize(l);
-
-        for(int i =0; i <3; i++)
-            triangleCoords[(i * 3) + 2] = 0.5f;
-
-        triangleCoords[0] = ((l/2.75f)-l)/2;
-        triangleCoords[1] = l;
-        triangleCoords[3] = -l;
-        triangleCoords[4] = -l;
-        triangleCoords[6] = l/2.75f;
-        triangleCoords[7] = -l;
+        triangleCoords = genCoords();
 
         float tGCoords[] = Utils.randPos(triangleCoords);
 
@@ -112,6 +102,27 @@ public class Triangle implements Shape{
             float aux = rightPoint;
             rightPoint = leftPoint;
             leftPoint = aux;
+        }
+
+        while((topPoint>0.85 || botPoint>0.85)&&(leftPoint<-0.85 || rightPoint<-0.85)){
+            triangleCoords = genCoords();
+            tGCoords = Utils.randPos(triangleCoords);
+
+            topPoint = tGCoords[1];
+            botPoint = tGCoords[4];
+            leftPoint = tGCoords[0];
+            rightPoint = tGCoords[6];
+
+            if(topPoint<botPoint){
+                float aux = topPoint;
+                topPoint = botPoint;
+                botPoint = aux;
+            }
+            if(rightPoint<leftPoint){
+                float aux = rightPoint;
+                rightPoint = leftPoint;
+                leftPoint = aux;
+            }
         }
 
         // initialize vertex byte buffer for shape coordinates
@@ -245,5 +256,22 @@ public class Triangle implements Shape{
     @Override
     public float getLeftPoint() {
         return leftPoint;
+    }
+
+    private float[] genCoords(){
+        float[] coords = new float[3 * 3];
+        l = Utils.randSize(l);
+
+        for(int i =0; i <3; i++)
+            coords[(i * 3) + 2] = 0.5f;
+
+        coords[0] = ((l/2.75f)-l)/2;
+        coords[1] = l;
+        coords[3] = -l;
+        coords[4] = -l;
+        coords[6] = l/2.75f;
+        coords[7] = -l;
+
+        return coords;
     }
 }

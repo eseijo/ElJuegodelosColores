@@ -27,12 +27,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
         private Triangle mTriangle;
         private Square mSquare;
         private Circle mCircle;
+        private Rectangle mRectangle;
         private Triangle mTriangle0;
         private Square mSquare0;
         private Circle mCircle0;
+        private Rectangle mRectangle0;
         private Triangle mTriangle1;
         private Square mSquare1;
         private Circle mCircle1;
+        private Rectangle mRectangle1;
 
         // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
         private final float[] mMVPMatrix = new float[16];
@@ -47,17 +50,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
 
             // Set the background frame color
             GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+            GLES20.glEnable(GLES20.GL_BLEND);
+            GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA,GLES20.GL_ONE_MINUS_SRC_ALPHA);
             refShape = Math.random();
             Log.d("log123", ""+refShape);
-            if(refShape<(1.0/3.0)){
+            if(refShape<0.25){
                 mTriangle = new Triangle(1);
                 store = 0;
-            }else if(refShape>=(1.0/3.0) && refShape<(2.0/3.0)){
+            }else if(refShape>=0.25 && refShape<0.5){
                 mSquare   = new Square(1);
                 store = 1;
-            }else{
+            }else if(refShape>=0.5 && refShape<0.75){
                 mCircle = new Circle(1);
                 store = 2;
+            } else {
+                mRectangle = new Rectangle(1);
+                store = 3;
             }
             mCircle0 = new Circle();
             mCircle1 = new Circle();
@@ -65,6 +74,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             mTriangle1 = new Triangle();
             mSquare0 = new Square();
             mSquare1 = new Square();
+            mRectangle0 = new Rectangle();
+            mRectangle1 = new Rectangle();
 
             shapes.add(mCircle0);
             shapes.add(mCircle1);
@@ -72,6 +83,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             shapes.add(mTriangle1);
             shapes.add(mSquare0);
             shapes.add(mSquare1);
+            shapes.add(mRectangle0);
+            shapes.add(mRectangle1);
 
             if(store==2){
                 refShapes.add(mCircle0);
@@ -79,9 +92,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             }else if(store==0){
                 refShapes.add(mTriangle0);
                 refShapes.add(mTriangle1);
-            }else{
+            }else if(store==1){
                 refShapes.add(mSquare0);
                 refShapes.add(mSquare1);
+            } else {
+                refShapes.add(mRectangle0);
+                refShapes.add(mRectangle1);
             }
         }
 
@@ -116,13 +132,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
             // for the matrix multiplication product to be correct.
             Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
 
-            if(refShape<(1.0/3.0)){
+            if(refShape<0.25){
                 mTriangle.draw(scratch);
-            }else if(refShape>=(1.0/3.0) && refShape<(2.0/3.0)){
+            }else if(refShape>=0.25 && refShape<0.5){
                 mSquare.draw(scratch);
-            }else{
+            }else if(refShape>=0.5 && refShape<0.75){
                 mCircle.draw(scratch);
+            } else {
+                mRectangle.draw(scratch);
             }
 
             for(Shape mSh : shapes){

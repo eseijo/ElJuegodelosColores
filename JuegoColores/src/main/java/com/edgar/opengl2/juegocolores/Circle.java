@@ -15,8 +15,8 @@ public class Circle implements Shape{
 
     private  int mProgram, mPositionHandle, mColorHandle, mMVPMatrixHandle ;
     private FloatBuffer mVertexBuffer;
-    private float vertices[] = new float[364 * 3];
-    float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+    private float vertices[] = new float[362 * 3];
+    float color[] = { 1.0f, 0.0f, 0.0f, 0.7f };
     float rad = (float)Math.random();
     private float topPoint;
     private float botPoint;
@@ -41,20 +41,18 @@ public class Circle implements Shape{
 
         rad = Utils.randSize(rad);
 
-        vertices[0] = 0;
-        vertices[1] = 0;
-        vertices[2] = 0;
+        vertices = genCoords();
+        float modV[] = Utils.randPos(vertices);
 
-        for(int i =1; i <364; i++){
-            vertices[(i * 3)+ 0] = (float) (rad * Math.cos((Math.PI/180) * (float)i ));
-            vertices[(i * 3)+ 1] = (float) (rad*1.75 * Math.sin((Math.PI/180) * (float)i ));
-            vertices[(i * 3)+ 2] = 0;
+        /*for(int i =1; i <362; i++){
+            Log.d("aawq", modV[(i * 3)+ 0]+" "+modV[(i * 3)+ 1]+" "+modV[(i * 3)+ 2]);
         }
 
-        float modV[] = Utils.randPos(vertices);
+        Log.d("aawq", "-------------------------------------------------------------------------");*/
+
         topPoint = modV[271];
         leftPoint = modV[540];
-        rightPoint = modV[1080];
+        rightPoint = modV[3];
         botPoint = modV[811];
 
         if(topPoint<botPoint){
@@ -66,6 +64,27 @@ public class Circle implements Shape{
             float aux = rightPoint;
             rightPoint = leftPoint;
             leftPoint = aux;
+        }
+
+        while((topPoint>0.85 || botPoint>0.85)&&(leftPoint<-0.85 || rightPoint<-0.85)){
+            vertices = genCoords();
+            modV = Utils.randPos(vertices);
+
+            topPoint = modV[271];
+            leftPoint = modV[540];
+            rightPoint = modV[3];
+            botPoint = modV[811];
+
+            if(topPoint<botPoint){
+                float aux = topPoint;
+                topPoint = botPoint;
+                botPoint = aux;
+            }
+            if(rightPoint<leftPoint){
+                float aux = rightPoint;
+                rightPoint = leftPoint;
+                leftPoint = aux;
+            }
         }
 
         //Log.v("awq2", ""+topPoint+" "+botPoint+" "+leftPoint+" "+rightPoint);
@@ -93,7 +112,7 @@ public class Circle implements Shape{
         modV[1] = 0.92f;
         modV[2] = 0;
 
-        for(int i =1; i <364; i++){
+        for(int i =1; i <362; i++){
             modV[(i * 3)+ 0] = (float) (0.037f * Math.cos((Math.PI/180) * (float)i ))-0.943f;
             modV[(i * 3)+ 1] = (float) (0.037f*1.75 * Math.sin((Math.PI/180) * (float)i ))+0.92f;
             modV[(i * 3)+ 2] = 0;
@@ -102,7 +121,7 @@ public class Circle implements Shape{
 
         topPoint = modV[271];
         leftPoint = modV[540];
-        rightPoint = modV[1080];
+        rightPoint = modV[3];
         botPoint = modV[811];
 
         if(topPoint<botPoint){
@@ -116,7 +135,7 @@ public class Circle implements Shape{
             leftPoint = aux;
         }
 
-        //Log.v("awq2", ""+topPoint+" "+botPoint+" "+leftPoint+" "+rightPoint);
+        Log.v("awq2", ""+topPoint+" "+botPoint+" "+leftPoint+" "+rightPoint);
 
         ByteBuffer vertexByteBuffer = ByteBuffer.allocateDirect(modV.length * 4);
         vertexByteBuffer.order(ByteOrder.nativeOrder());
@@ -165,7 +184,7 @@ public class Circle implements Shape{
 
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 364);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 362);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
@@ -187,6 +206,23 @@ public class Circle implements Shape{
     @Override
     public float getLeftPoint() {
         return leftPoint;
+    }
+
+    private float[] genCoords(){
+        float[] coords = new float[362 * 3];
+        rad = Utils.randSize(rad);
+
+        coords[0] = 0;
+        coords[1] = 0;
+        coords[2] = 0;
+
+        for(int i =1; i <362; i++){
+            coords[(i * 3)+ 0] = (float) (rad * Math.cos((Math.PI/180) * (float)i ));
+            coords[(i * 3)+ 1] = (float) (rad*1.75 * Math.sin((Math.PI/180) * (float)i ));
+            coords[(i * 3)+ 2] = 0;
+        }
+
+        return coords;
     }
 
 }
